@@ -61,8 +61,8 @@ if __name__ == '__main__':
     # set up DS9
     ds9 = night_config['ds9']
     if ds9:
-        j.ds9.setup(ds9_window_id)
         ds9_window_id = inst_config['ds9']['window_id']
+        j.ds9.setup(ds9_window_id)
         draw_regions = True
     else:
         ds9_window_id = None
@@ -135,7 +135,7 @@ if __name__ == '__main__':
         shift = d.measure_shift(filename)
         sx = round(shift.x.value, 2)
         sy = round(shift.y.value, 2)
-        # check for big shifts, exclude images now until
+        # check for big shifts
         shifts = np.array([abs(sx), abs(sy)])
         if np.sum(shifts > night_config['max_donuts_shift']) > 0:
             print(f'{filename} image shift too big X: {sx} Y: {sy}')
