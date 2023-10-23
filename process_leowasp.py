@@ -58,9 +58,16 @@ if __name__ == '__main__':
     night_config = j.config.load(args.night_config)
     inst_config = j.config.load(args.instrument_config)
 
-    # load some common params from config
+    # set up DS9
     ds9 = night_config['ds9']
-    ds9_window_id = inst_config['ds9']['window_id']
+    if ds9:
+        j.ds9.setup(ds9_window_id)
+        ds9_window_id = inst_config['ds9']['window_id']
+        draw_regions = True
+    else:
+        ds9_window_id = None
+        draw_regions = False
+
     # set up the observatory EarthLocation
     location = EarthLocation(lat=inst_config['observatory']['olat']*u.deg,
                              lon=inst_config['observatory']['olon']*u.deg,
@@ -76,12 +83,6 @@ if __name__ == '__main__':
         x, y = j.coords.recenter_stars(x, y, source_x, source_y, night_config['max_sep_shift'])
     # otherwise leave apertures as manually placed
 
-    # set up DS9
-    if ds9:
-        j.ds9.setup(ds9_window_id)
-        draw_regions = True
-    else:
-        draw_regions = False
     # set up the reference image
     d = Donuts(night_config['reference_image'])
 
