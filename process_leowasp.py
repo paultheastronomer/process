@@ -15,7 +15,7 @@ from donuts import Donuts
 import jastro as j
 
 # TODO: rolling shutter time correction
-# TODO: gain?
+# TODO: fix bias level correction (MEDBIAS)
 
 # ignore some annoying warnings
 warnings.simplefilter('ignore', category=FITSFixedWarning)
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         master_bias=master_bias, dark_keyword=inst_config['imager']['dark_keyword'],
         exptime_keyword=inst_config['imager']['exptime_keyword'],
         master_dark_filename=night_config['master_dark_filename'])
-    if master_dark and args.ds9:
+    if master_dark and ds9:
         j.ds9.display(ds9_window_id, night_config['master_dark_filename'])
         time.sleep(5)
 
@@ -149,5 +149,5 @@ if __name__ == '__main__':
         # do photometry on good images
         j.photometry.phot(data, shift, x, y, rsi, rso, night_config['aperture_radii'],
                           filename, jd, bjd, hjd, ds9_name=ds9_window_id,
-                          gain=1.00, draw_regions=draw_regions,
+                          gain=0.4, draw_regions=draw_regions,
                           index_offset=inst_config['ds9']['index_offset'])
