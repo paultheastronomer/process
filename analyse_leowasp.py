@@ -59,9 +59,13 @@ if __name__ == "__main__":
     inst_config = j.config.load(args.instrument_config)
 
     # get the aperture radius and filter
-    print('Plotting from photometry {args.phot_file}...')
+    print(f'Plotting from photometry {args.phot_file}...')
     aperture_radius = args.phot_file.split('phot')[1]
     filt = night_config['filter']
+    bin_fact = night_config['binning']
+    fit_type = night_config['fit_type']
+    fit_low = night_config['fit_parameters'][0]
+    fit_high = night_config['fit_parameters'][1]
 
     # load the photometry file
     try:
@@ -72,9 +76,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # select the different times
-    jd = lcs[1]
-    bjd = lcs[2]
-    hjd = lcs[3]
+    filenames = list(lcs[0])
+    jd = np.array(lcs[1])
+    bjd = np.array(lcs[2])
+    hjd = np.array(lcs[3])
     jd0 = int(jd[0])
     jd = jd - jd0
 
@@ -106,7 +111,7 @@ if __name__ == "__main__":
         # plot the comparisons
         j.plots.plot_comparison_stars(jd, comparisons)
         # plot the raw fluxes
-        j.plots.plot_star_fluxes(jd, comparisons, target, args.plot)
+        j.plots.plot_star_fluxes(jd, comparisons, target, aperture_radius)
 
     # get error on transit from quotiant rule for errors
     dx = target_err/target
@@ -114,20 +119,23 @@ if __name__ == "__main__":
     lightcurve_err = np.sqrt((dx**2)+(dy**2))
     lightcurve = target/comparison
 
-    # TODO: add normalisation routine
+    # get some target info
+    target_id = j.housekeeping.get_target_id(night_config['reference_image'],
+                                             inst_config['imager']['object_keyword'])
+    night_id = j.housekeeping.get_night_id(night_config['reference_image'],
+                                           inst_config['imager']['dateobs_start_keyword'])
+    # normalise the light curve
+    lightcurve_n, lightcurve_err_n = j.lightcurves.normalise(filt, jd, jd0,
+        lightcurve, lightcurve_err, aperture_radius, bin_fact, target_id,
+        night_id, fit_type=fit_type, fit_low=fit_low, fit_high=fit_high)
 
     # convert normalised lc to mags
-    # TODO: need to normalise first
-    #mags, mags_err = j.lightcurves.lc_flux_to_mags(lightcurve_n, lightcurve_err_n)
+    mags, mags_err = j.lightcurves.lc_flux_to_mags(lightcurve_n, lightcurve_err_n)
 
     # generate output files here
-    #if args.output:
-    #    target_id = j.housekeeping.get_target_id(night_config['reference_image'],
-    #                                             inst_config['imager']['object_keyword'])
-    #    night_id = j.housekeeping.get_night_id(night_config['reference_image'],
-    #                                           inst_config['imager']['dateobs_start_keyword'])
-    #    outname = f'{target_id}_{filt}_{night_id}_F{args.fittype}_A{aperture_radius}.lc.txt'
-    #    np.savetxt(outname,
-    #               np.c_[jd+jd0, hjd, bjd, lightcurve_n, lightcurve_err_n, mags, mags_err],
-    #               fmt='%.8f  %.8f  %.8f  %.4f  %.4f  %.4f  %.4f',
-    #               header='JD-MID  HJD-MID  BJD_TDB-MID  FLUX  FLUX_ERR  MAG  MAG_ERR')
+    if args.output:
+        outname = f'{target_id}_{filt}_{night_id}_F{args.fittype}_A{aperture_radius}.lc.txt'
+        np.savetxt(outname,
+                   np.c_[jd+jd0, hjd, bjd, lightcurve_n, lightcurve_err_n, mags, mags_err],
+                   fmt='%.8f  %.8f  %.8f  %.4f  %.4f  %.4f  %.4f',
+                   header='JD-MID  HJD-MID  BJD_TDB-MID  FLUX  FLUX_ERR  MAG  MAG_ERR')

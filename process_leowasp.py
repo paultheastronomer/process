@@ -8,6 +8,7 @@ import time
 import warnings
 import argparse as ap
 import numpy as np
+from datetime import datetime
 import astropy.units as u
 from astropy.wcs import FITSFixedWarning
 from astropy.coordinates import EarthLocation
@@ -90,16 +91,17 @@ if __name__ == '__main__':
     images = j.housekeeping.get_image_list()
 
     # make master bias
-    master_bias = j.reduce.make_master_bias(images,
-        bias_keyword=inst_config['imager']['bias_keyword'],
-        master_bias_filename=night_config['master_bias_filename'])
-    if master_bias and ds9:
-        j.ds9.display(ds9_window_id, night_config['master_bias_filename'])
-        time.sleep(5)
+    #master_bias = j.reduce.make_master_bias(images,
+    #    bias_keyword=inst_config['imager']['bias_keyword'],
+    #    master_bias_filename=night_config['master_bias_filename'])
+    #if master_bias and ds9:
+    #    j.ds9.display(ds9_window_id, night_config['master_bias_filename'])
+    #    time.sleep(5)
 
     # make master dark
-    master_dark, dark_exp = j.reduce.make_master_dark(images,
-        master_bias=master_bias, dark_keyword=inst_config['imager']['dark_keyword'],
+    master_dark, dark_exp = j.reduce.make_master_dark_osc(images,
+        overscan_keyword=inst_config['imager']['overscan_keyword'],
+        dark_keyword=inst_config['imager']['dark_keyword'],
         exptime_keyword=inst_config['imager']['exptime_keyword'],
         master_dark_filename=night_config['master_dark_filename'])
     if master_dark and ds9:
@@ -107,47 +109,51 @@ if __name__ == '__main__':
         time.sleep(5)
 
     # make master flat
-    master_flat = j.reduce.make_master_flat(images, night_config['filter'],
-        master_bias=master_bias, master_dark=master_dark,
-        flat_keyword=inst_config['imager']['flat_keyword'],
-        exptime_keyword=inst_config['imager']['exptime_keyword'],
-        dark_exp=dark_exp, master_flat_filename=night_config['master_flat_filename'])
-    if master_flat and ds9:
-        j.ds9.display(ds9_window_id, night_config['master_flat_filename'])
-        time.sleep(5)
+    #master_flat = j.reduce.make_master_flat(images, night_config['filter'],
+    #    master_bias=master_bias, master_dark=master_dark,
+    #    flat_keyword=inst_config['imager']['flat_keyword'],
+    #    exptime_keyword=inst_config['imager']['exptime_keyword'],
+    #    dark_exp=dark_exp, master_flat_filename=night_config['master_flat_filename'])
+    #if master_flat and ds9:
+    #    j.ds9.display(ds9_window_id, night_config['master_flat_filename'])
+    #    time.sleep(5)
 
     # reduce all the images and do the photometry
-    for filename in images.files_filtered(imagetyp=inst_config['imager']['image_keyword'],
-                                          filter=night_config['filter']):
-        if ds9:
-            j.ds9.display(ds9_window_id, filename)
-        # correct the times and reduce the images
-        data, jd, bjd, hjd = j.reduce.correct_data(filename, night_config['filter'],
-            location, master_bias=master_bias, master_dark=master_dark,
-            master_flat=master_flat, dark_exp=dark_exp,
-            exptime_keyword=inst_config['imager']['exptime_keyword'],
-            ra_keyword=inst_config['imager']['ra_keyword'],
-            dec_keyword=inst_config['imager']['dec_keyword'],
-            dateobs_start_keyword=inst_config['imager']['dateobs_start_keyword'],
-            output_reduced_frames=night_config['output_reduced'])
-
-        # inspect shifts between images
-        shift = d.measure_shift(filename)
-        sx = round(shift.x.value, 2)
-        sy = round(shift.y.value, 2)
-        # check for big shifts
-        shifts = np.array([abs(sx), abs(sy)])
-        if np.sum(shifts > night_config['max_donuts_shift']) > 0:
-            print(f'{filename} image shift too big X: {sx} Y: {sy}')
-            if not os.path.exists('failed_donuts'):
-                os.mkdir('failed_donuts')
-            comm = f'mv {filename} failed_donuts/'
-            print(comm)
-            os.system(comm)
-            continue
-
-        # do photometry on good images
-        j.photometry.phot(data, shift, x, y, rsi, rso, night_config['aperture_radii'],
-                          filename, jd, bjd, hjd, ds9_name=ds9_window_id,
-                          gain=0.4, draw_regions=draw_regions,
-                          index_offset=inst_config['ds9']['index_offset'])
+    #for filename in images.files_filtered(imagetyp=inst_config['imager']['image_keyword'],
+    #                                      filter=night_config['filter']):
+    #    t1 = datetime.utcnow()
+    #    if ds9:
+    #        j.ds9.display(ds9_window_id, filename)
+    #    # correct the times and reduce the images
+    #    data, jd, bjd, hjd = j.reduce.correct_data(filename, night_config['filter'],
+    #        location, master_bias=master_bias, master_dark=master_dark,
+    #        master_flat=master_flat, dark_exp=dark_exp,
+    #        exptime_keyword=inst_config['imager']['exptime_keyword'],
+    #        ra_keyword=inst_config['imager']['ra_keyword'],
+    #        dec_keyword=inst_config['imager']['dec_keyword'],
+    #        dateobs_start_keyword=inst_config['imager']['dateobs_start_keyword'],
+    #        output_reduced_frames=night_config['output_reduced'])
+    #
+    #    # inspect shifts between images
+    #    shift = d.measure_shift(filename)
+    #    sx = round(shift.x.value, 2)
+    #    sy = round(shift.y.value, 2)
+    #    # check for big shifts
+    #    shifts = np.array([abs(sx), abs(sy)])
+    #    if np.sum(shifts > night_config['max_donuts_shift']) > 0:
+    #        print(f'{filename} image shift too big X: {sx} Y: {sy}')
+    #        if not os.path.exists('failed_donuts'):
+    #            os.mkdir('failed_donuts')
+    #        comm = f'mv {filename} failed_donuts/'
+    #        print(comm)
+    #        os.system(comm)
+    #        continue
+    #
+    #    # do photometry on good images
+    #    j.photometry.phot(data, shift, x, y, rsi, rso, night_config['aperture_radii'],
+    #                      filename, jd, bjd, hjd, ds9_name=ds9_window_id,
+    #                      gain=0.4, draw_regions=draw_regions,
+    #                      index_offset=inst_config['ds9']['index_offset'])
+    #    t2 = datetime.utcnow()
+    #    print(t2-t1)
+    #    break
