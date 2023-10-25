@@ -104,19 +104,20 @@ if __name__ == '__main__':
         dark_keyword=inst_config['imager']['dark_keyword'],
         exptime_keyword=inst_config['imager']['exptime_keyword'],
         master_dark_filename=night_config['master_dark_filename'])
-    if master_dark and ds9:
+    if master_dark is not None and ds9:
         j.ds9.display(ds9_window_id, night_config['master_dark_filename'])
         time.sleep(5)
 
     # make master flat
-    #master_flat = j.reduce.make_master_flat(images, night_config['filter'],
-    #    master_bias=master_bias, master_dark=master_dark,
-    #    flat_keyword=inst_config['imager']['flat_keyword'],
-    #    exptime_keyword=inst_config['imager']['exptime_keyword'],
-    #    dark_exp=dark_exp, master_flat_filename=night_config['master_flat_filename'])
-    #if master_flat and ds9:
-    #    j.ds9.display(ds9_window_id, night_config['master_flat_filename'])
-    #    time.sleep(5)
+    master_flat = j.reduce.make_master_flat_osc(images, night_config['filter'],
+        overscan_keyword=inst_config['imager']['overscan_keyword'],
+        master_dark=master_dark, dark_exp=dark_exp,
+        flat_keyword=inst_config['imager']['flat_keyword'],
+        exptime_keyword=inst_config['imager']['exptime_keyword'],
+        master_flat_filename=night_config['master_flat_filename'])
+    if master_flat is not None and ds9:
+        j.ds9.display(ds9_window_id, night_config['master_flat_filename'])
+        time.sleep(5)
 
     # reduce all the images and do the photometry
     #for filename in images.files_filtered(imagetyp=inst_config['imager']['image_keyword'],
