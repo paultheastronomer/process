@@ -152,7 +152,7 @@ if __name__ == '__main__':
         # do photometry on good images
         j.photometry.phot(data, shift, x, y, rsi, rso, night_config['aperture_radii'],
                           filename, jd, bjd, hjd, ds9_name=ds9_window_id,
-                          gain=0.4, draw_regions=draw_regions,
+                          gain=1.0, draw_regions=draw_regions,
                           index_offset=inst_config['ds9']['index_offset'])
         t2 = datetime.utcnow()
         print(t2-t1)
