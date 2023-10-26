@@ -9,13 +9,9 @@ import warnings
 import argparse as ap
 from datetime import datetime
 import numpy as np
-import astropy.units as u
 from astropy.wcs import FITSFixedWarning
-from astropy.coordinates import EarthLocation
 from donuts import Donuts
 import jastro as j
-
-# TODO: rolling shutter time correction
 
 # ignore some annoying warnings
 warnings.simplefilter('ignore', category=FITSFixedWarning)
@@ -69,33 +65,13 @@ if __name__ == '__main__':
         draw_regions = False
 
     # set up the observatory EarthLocation
-    location = EarthLocation(lat=inst_config['observatory']['olat']*u.deg,
-                             lon=inst_config['observatory']['olon']*u.deg,
-                             height=inst_config['observatory']['elev']*u.m)
-
-    # set up the apertures for photometry
-    x, y, rsi, rso = j.ds9.read_region_file(night_config['region_file'])
-    # if not defocused, do some recentering
-    if not night_config['defocused']:
-        _, source_x, source_y, *_ = j.coords.source_extract(night_config['reference_image'],
-                                                            inst_config['sky']['background_sigma'],
-                                                            rad_sky_inner=rsi, rad_sky_outer=rso)
-        x, y = j.coords.recenter_stars(x, y, source_x, source_y, night_config['max_sep_shift'])
-    # otherwise leave apertures as manually placed
-
+    location = j.coords.get_location(inst_config)
+    # load the apertures for photometry
+    x, y, rsi, rso = j.coords.load_apertures(night_config, inst_config)
     # set up the reference image
     d = Donuts(night_config['reference_image'])
-
     # get list of all images
     images = j.housekeeping.get_image_list()
-
-    # make master bias
-    #master_bias = j.reduce.make_master_bias(images,
-    #    bias_keyword=inst_config['imager']['bias_keyword'],
-    #    master_bias_filename=night_config['master_bias_filename'])
-    #if master_bias and ds9:
-    #    j.ds9.display(ds9_window_id, night_config['master_bias_filename'])
-    #    time.sleep(5)
 
     # make master dark
     master_dark, dark_exp = j.reduce.make_master_dark_osc(images,
