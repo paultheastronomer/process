@@ -125,7 +125,7 @@ if __name__ == "__main__":
     night_id = j.housekeeping.get_night_id(night_config['reference_image'],
                                            inst_config['imager']['dateobs_start_keyword'])
     # normalise the light curve
-    lightcurve_n, lightcurve_err_n = j.lightcurves.normalise(filt, jd, jd0,
+    lightcurve_n, lightcurve_err_n, lightcurve_err_nb = j.lightcurves.normalise(filt, jd, jd0,
         lightcurve, lightcurve_err, aperture_radius, bin_fact, target_id,
         night_id, fit_type=fit_type, fit_low=fit_low, fit_high=fit_high)
 
