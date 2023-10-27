@@ -45,7 +45,7 @@ Data reduction is done in memory to save disc space. Master calibration frames a
 
 Photometry is then analysed with a second analysis script (e.g. ```analyse_leowasp.py```)
 
-## Example instrument config
+## Example nightly config
 
 ```json
 {
@@ -75,7 +75,7 @@ Photometry is then analysed with a second analysis script (e.g. ```analyse_leowa
 }
 ```
 
-## Example nightly config
+## Example instrument config
 
 ```json
 {
