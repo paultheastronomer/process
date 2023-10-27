@@ -80,8 +80,11 @@ if __name__ == "__main__":
     jd = np.array(lcs[1])
     bjd = np.array(lcs[2])
     hjd = np.array(lcs[3])
+    # trim integer days for now, easier to plot etc
     jd0 = int(jd[0])
     jd = jd - jd0
+    bjd = bjd - jd0
+    hjd = hjd - jd0
 
     # get all the comparisons into a stackable numpy array
     # make a check on the comparison stars before continuing
@@ -114,10 +117,10 @@ if __name__ == "__main__":
         j.plots.plot_star_fluxes(jd, comparisons, target, aperture_radius)
 
     # get error on transit from quotiant rule for errors
+    lightcurve = target/comparison
     dx = target_err/target
     dy = comparison_err/comparison
-    lightcurve_err = np.sqrt((dx**2)+(dy**2))
-    lightcurve = target/comparison
+    lightcurve_err = np.sqrt((dx**2)+(dy**2)) * lightcurve
 
     # get some target info
     target_id = j.housekeeping.get_target_id(night_config['reference_image'],
@@ -125,17 +128,24 @@ if __name__ == "__main__":
     night_id = j.housekeeping.get_night_id(night_config['reference_image'],
                                            inst_config['imager']['dateobs_start_keyword'])
     # normalise the light curve
-    lightcurve_n, lightcurve_err_n, lightcurve_err_nb = j.lightcurves.normalise(filt, jd, jd0,
-        lightcurve, lightcurve_err, aperture_radius, bin_fact, target_id,
+    lightcurve_n, lightcurve_err_n, bjd_b, lightcurve_nb, lightcurve_err_nb = j.lightcurves.normalise(filt,
+        bjd, jd0, lightcurve, lightcurve_err, aperture_radius, bin_fact, target_id,
         night_id, fit_type=fit_type, fit_low=fit_low, fit_high=fit_high)
 
     # convert normalised lc to mags
-    mags, mags_err = j.lightcurves.lc_flux_to_mags(lightcurve_n, lightcurve_err_n)
+    mags, mags_err = j.lightcurves.flux_to_mags(lightcurve_n, lightcurve_err_n)
 
     # generate output files here
     if args.output:
+        # unbinned
         outname = f'{target_id}_{filt}_{night_id}_F{args.fittype}_A{aperture_radius}.lc.txt'
         np.savetxt(outname,
-                   np.c_[jd+jd0, hjd, bjd, lightcurve_n, lightcurve_err_n, mags, mags_err],
+                   np.c_[jd+jd0, hjd+jd0, bjd+jd0, lightcurve_n, lightcurve_err_n, mags, mags_err],
                    fmt='%.8f  %.8f  %.8f  %.4f  %.4f  %.4f  %.4f',
                    header='JD-MID  HJD-MID  BJD_TDB-MID  FLUX  FLUX_ERR  MAG  MAG_ERR')
+        # binned
+        outname_b = f'{target_id}_{filt}_{night_id}_F{args.fittype}_A{aperture_radius}_b{bin_fact}.lc.txt'
+        np.savetxt(outname_b,
+                   np.c_[bjd_b+jd0, lightcurve_nb, lightcurve_err_nb],
+                   fmt='%.8f  %.4f  %.4f',
+                   header='BJD_TDB-MID  FLUX  FLUX_ERR')
