@@ -58,7 +58,7 @@ if __name__ == '__main__':
     ds9 = night_config['ds9']
     if ds9:
         ds9_window_id = inst_config['ds9']['window_id']
-        j.ds9.setup(ds9_window_id)
+        j.ds9.setup(ds9_window_id, inst_config['ds9']['ds9_app_path'])
         draw_regions = True
     else:
         ds9_window_id = None
