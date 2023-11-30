@@ -4,6 +4,7 @@ A collection of scripts for analysing data from different instruments using the 
 
    1. ```process_leowasp.py``` script for reducing LEOWASP data and performing aperture photometry
    1. ```analyse_leowasp.py``` script to analyse the aperture photometry of LEOWASP data
+   1. ```process_halfmetre.py``` script for reducing LP 0.5m data and performing aperture photometry
 
 
 # Installing JASTRO
