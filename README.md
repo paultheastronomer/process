@@ -109,7 +109,7 @@ Photometry is then analysed with a second analysis script (e.g. ```analyse_leowa
     },
     "ds9": {
         "window_id": "LEOWASP",
-        "app_path": "/Applications/SAOImageDS9.app/Contents/MacOS/ds9",
+        "ds9_app_path": "/Applications/SAOImageDS9.app/Contents/MacOS/ds9",
         "index_offset": 1
     }
 }
