@@ -41,6 +41,7 @@ if __name__ == "__main__":
     # remake the fits header
     new_hdr = {}
     new_hdr['CAM-WIND'] = args.frame_coords
+    new_hdr['EXPTIME'] = hdr['EXPTIME']
 
     # write out the windowed calibration frame
     new_filename = f"{args.calib_frame.split('.f')[0]}-X{x1+1}_{x2}-Y{y1+1}_{y2}.fits"
