@@ -76,12 +76,12 @@ if __name__ == '__main__':
     # get list of all images
     images = j.housekeeping.get_image_list()
 
-    # make master dark
-    master_dark, dark_exp = j.reduce.make_master_dark_osc(images,
-        overscan_keyword=inst_config['imager']['overscan_keyword'],
-        dark_keyword=inst_config['imager']['dark_keyword'],
-        exptime_keyword=inst_config['imager']['exptime_keyword'],
-        master_dark_filename=night_config['master_dark_filename'])
+    # for leowasp we're using pre-made darks
+    # load them up and remove med-bias
+    master_dark, header = j.housekeeping.load_fits_image(night_config['master_dark_filename'])
+    dark_exp = round(float(header[inst_config['imager']['exptime_keyword']]), 2)
+    med_bias = header['MEDBIAS']
+    master_dark = master_dark - med_bias
     if master_dark is not None and ds9:
         j.ds9.display(ds9_window_id, night_config['master_dark_filename'])
         time.sleep(5)
@@ -92,7 +92,8 @@ if __name__ == '__main__':
         master_dark=master_dark, dark_exp=dark_exp,
         flat_keyword=inst_config['imager']['flat_keyword'],
         exptime_keyword=inst_config['imager']['exptime_keyword'],
-        master_flat_filename=night_config['master_flat_filename'])
+        master_flat_filename=night_config['master_flat_filename'],
+        med_bias=med_bias)
     if master_flat is not None and ds9:
         j.ds9.display(ds9_window_id, night_config['master_flat_filename'])
         time.sleep(5)
@@ -113,7 +114,8 @@ if __name__ == '__main__':
                 exptime_keyword=inst_config['imager']['exptime_keyword'],
                 ra_keyword=inst_config['imager']['ra_keyword'],
                 dec_keyword=inst_config['imager']['dec_keyword'],
-                dateobs_start_keyword=inst_config['imager']['dateobs_start_keyword'])
+                dateobs_start_keyword=inst_config['imager']['dateobs_start_keyword'],
+                med_bias=med_bias)
 
             # inspect shifts between images
             shift = d.measure_shift(filename)
