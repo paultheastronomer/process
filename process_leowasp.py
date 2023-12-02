@@ -138,6 +138,3 @@ if __name__ == '__main__':
                               index_offset=inst_config['ds9']['index_offset'])
             t2 = datetime.utcnow()
             print(t2-t1)
-    else:
-        t2 = datetime.utcnow()
-        print(t2-t1)
