@@ -51,5 +51,5 @@ if __name__ == "__main__":
     new_hdr['CAM-WIND'] = args.frame_coords
 
     # write out the windowed calibration frame
-    new_filename = f"{args.calib_frame.split('.f')[0]}_X{x1}-{x2}_Y{y1}-{y2}.fits"
+    new_filename = f"{args.calib_frame.split('.f')[0]}_X{x1+1}-{x2}_Y{y1+1}-{y2}.fits"
     jhk.write_fits_image(new_filename, data_sf, new_hdr, clobber=True)
