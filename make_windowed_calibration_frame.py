@@ -34,20 +34,12 @@ if __name__ == "__main__":
 
     # load the calibration frame
     data, hdr = jhk.load_fits_image(args.calib_frame)
-    camid = hdr['CAMID']
-    exptime = hdr['EXPTIME']
-    count = hdr['COUNT']
-    medbias = hdr['MEDBIAS']
 
     # apply the window
     data_sf = data[y1:y2, x1:x2]
 
     # remake the fits header
     new_hdr = {}
-    new_hdr['CAMID'] = camid
-    new_hdr['EXPTIME'] = exptime
-    new_hdr['COUNT'] = count
-    new_hdr['MEDBIAS'] = medbias
     new_hdr['CAM-WIND'] = args.frame_coords
 
     # write out the windowed calibration frame
