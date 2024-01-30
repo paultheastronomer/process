@@ -96,7 +96,7 @@ if __name__ == '__main__':
         time.sleep(5)
 
     # reduce all the images and do the photometry
-    for filename in images[night_config["target_id"]][night_config["filter"]]:
+    for filename in images[night_config["object_id"]][night_config["filter"]]:
         t1 = datetime.utcnow()
         if ds9:
             j.ds9.display(ds9_window_id, filename)

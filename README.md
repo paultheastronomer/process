@@ -50,7 +50,7 @@ Photometry is then analysed with a second analysis script (e.g. ```analyse_leowa
 
 ```json
 {
-    "target_id": "TOIXXX",
+    "object_id": "TOIXXX",
     "filter": "RGB-R",
     "reference_image": "TOIXXX-CAM3-20230101200000.fits",
     "region_file": "TOIXXX-CAM3-20230101200000.reg",
@@ -88,6 +88,7 @@ Photometry is then analysed with a second analysis script (e.g. ```analyse_leowa
             "RGB-G",
             "RGB-B"
         ],
+        "object_keyword": "OBJECT",
         "ra_keyword": "MNTRA",
         "dec_keyword": "MNTDEC",
         "filter_keyword": "FILTER",
