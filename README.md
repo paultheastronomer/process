@@ -50,6 +50,7 @@ Photometry is then analysed with a second analysis script (e.g. ```analyse_leowa
 
 ```json
 {
+    "target_id": "TOIXXX",
     "filter": "RGB-R",
     "reference_image": "TOIXXX-CAM3-20230101200000.fits",
     "region_file": "TOIXXX-CAM3-20230101200000.reg",
