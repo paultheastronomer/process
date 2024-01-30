@@ -74,7 +74,8 @@ if __name__ == '__main__':
     # set up the reference image
     d = Donuts(night_config['reference_image'])
     # get list of all images
-    images = j.housekeeping.get_image_list()
+    images = j.housekeeping.get_image_file_collection(inst_config, directory='.',
+                                                      glob_exclude='master*')
 
     # for leowasp we're using pre-made darks
     # load them up and remove med-bias
@@ -85,6 +86,8 @@ if __name__ == '__main__':
     if master_dark is not None and ds9:
         j.ds9.display(ds9_window_id, night_config['master_dark_filename'])
         time.sleep(5)
+
+    # TODO: propagate the objects/filters through the script
 
     # make master flat
     master_flat = j.reduce.make_master_flat_osc(images, night_config['filter'],

@@ -89,6 +89,8 @@ Photometry is then analysed with a second analysis script (e.g. ```analyse_leowa
         ],
         "ra_keyword": "MNTRA",
         "dec_keyword": "MNTDEC",
+        "filter_keyword": "FILTER",
+        "image_type_keyword": "IMAGETYP",
         "image_keyword": "SCIENCE",
         "flat_keyword": "FLAT",
         "bias_keyword": "BIAS",
