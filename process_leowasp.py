@@ -104,8 +104,7 @@ if __name__ == '__main__':
     # check if only dealing with calibration frames
     if not args.calibrations_only:
         # reduce all the images and do the photometry
-        for filename in images.files_filtered(imagetyp=inst_config['imager']['image_keyword'],
-                                              filter=night_config['filter']):
+        for filename in images['science'][night_config["object_id"]][night_config["filter"]]:
             t1 = datetime.utcnow()
             if ds9:
                 j.ds9.display(ds9_window_id, filename)

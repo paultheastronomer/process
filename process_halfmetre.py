@@ -84,8 +84,6 @@ if __name__ == '__main__':
         j.ds9.display(ds9_window_id, night_config['master_dark_filename'])
         time.sleep(5)
 
-    # TODO: propagate the objects/filters through the script
-
     # make master flat
     master_flat = j.reduce.make_master_flat_osc(images, night_config['filter'],
         overscan_keyword=inst_config['imager']['overscan_keyword'],
@@ -98,8 +96,7 @@ if __name__ == '__main__':
         time.sleep(5)
 
     # reduce all the images and do the photometry
-    for filename in images.files_filtered(imagetyp=inst_config['imager']['image_keyword'],
-                                          filter=night_config['filter']):
+    for filename in images[night_config["object_id"]][night_config["filter"]]:
         t1 = datetime.utcnow()
         if ds9:
             j.ds9.display(ds9_window_id, filename)
