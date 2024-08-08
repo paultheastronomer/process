@@ -46,6 +46,9 @@ def arg_parse():
                    help="config file for this reduction")
     p.add_argument("instrument_config",
                    help="config file for this instrument")
+    p.add_argument("--calibrations_only",
+                   help="make master calib frames only?",
+                   action='store_true')
     return p.parse_args()
 
 if __name__ == '__main__':
@@ -72,7 +75,9 @@ if __name__ == '__main__':
     # set up the reference image
     d = Donuts(night_config['reference_image'])
     # get list of all images
-    images = j.housekeeping.get_image_list()
+    images = j.housekeeping.get_image_file_collection(inst_config, directory='.',
+                                                      glob_exclude='master*')
+
 
     # make master dark
     master_dark, dark_exp = j.reduce.make_master_dark_osc(images,
@@ -80,6 +85,8 @@ if __name__ == '__main__':
         dark_keyword=inst_config['imager']['dark_keyword'],
         exptime_keyword=inst_config['imager']['exptime_keyword'],
         master_dark_filename=night_config['master_dark_filename'])
+    
+    #med_bias = header['MEDBIAS']
     if master_dark is not None and ds9:
         j.ds9.display(ds9_window_id, night_config['master_dark_filename'])
         time.sleep(5)
@@ -95,43 +102,48 @@ if __name__ == '__main__':
         j.ds9.display(ds9_window_id, night_config['master_flat_filename'])
         time.sleep(5)
 
-    # reduce all the images and do the photometry
-    for filename in images.files_filtered(imagetyp=inst_config['imager']['image_keyword'],
-                                          filter=night_config['filter']):
-        t1 = datetime.utcnow()
-        if ds9:
-            j.ds9.display(ds9_window_id, filename)
-        # correct the times and reduce the images
-        data, jd, bjd, hjd = j.reduce.correct_data_osc(filename, night_config['filter'],
-            location, master_dark=master_dark,
-            overscan_keyword=inst_config['imager']['overscan_keyword'],
-            master_flat=master_flat, dark_exp=dark_exp,
-            exptime_keyword=inst_config['imager']['exptime_keyword'],
-            ra_keyword=inst_config['imager']['ra_keyword'],
-            dec_keyword=inst_config['imager']['dec_keyword'],
-            dateobs_start_keyword=inst_config['imager']['dateobs_start_keyword'])
 
-        # inspect shifts between images
-        shift = d.measure_shift(filename)
-        sx = round(shift.x.value, 2)
-        sy = round(shift.y.value, 2)
-        # check for big shifts
-        shifts = np.array([abs(sx), abs(sy)])
-        if np.sum(shifts > night_config['max_donuts_shift']) > 0:
-            print(f'{filename} image shift too big X: {sx} Y: {sy}')
-            if not os.path.exists('failed_donuts'):
-                os.mkdir('failed_donuts')
-            comm = f'mv {filename} failed_donuts/'
-            print(comm)
-            os.system(comm)
-            continue
 
-        # do photometry on good images
-        print(x,y)
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        j.photometry.phot(data, shift, x, y, rsi, rso, night_config['aperture_radii'],
-                          filename, jd, bjd, hjd, ds9_name=ds9_window_id,
-                          gain=1.0, draw_regions=draw_regions,
-                          index_offset=inst_config['ds9']['index_offset'])
-        t2 = datetime.utcnow()
-        print(t2-t1)
+    # check if only dealing with calibration frames
+    if not args.calibrations_only:
+        # reduce all the images and do the photometry
+        print(images['science'])
+        for filename in images['science'][night_config["object_id"]][night_config["filter"]]:
+            t1 = datetime.utcnow()
+            if ds9:
+                j.ds9.display(ds9_window_id, filename)
+            # correct the times and reduce the images
+            data, jd, bjd, hjd = j.reduce.correct_data_osc(filename, night_config['filter'],
+                location, master_dark=master_dark,
+                overscan_keyword=inst_config['imager']['overscan_keyword'],
+                master_flat=master_flat, dark_exp=dark_exp,
+                exptime_keyword=inst_config['imager']['exptime_keyword'],
+                ra_keyword=inst_config['imager']['ra_keyword'],
+                dec_keyword=inst_config['imager']['dec_keyword'],
+                dateobs_start_keyword=inst_config['imager']['dateobs_start_keyword'])#,
+                #med_bias=med_bias)
+
+            # inspect shifts between images
+            shift = d.measure_shift(filename)
+            sx = round(shift.x.value, 2)
+            sy = round(shift.y.value, 2)
+            # check for big shifts
+            shifts = np.array([abs(sx), abs(sy)])
+            if np.sum(shifts > night_config['max_donuts_shift']) > 0:
+                print(f'{filename} image shift too big X: {sx} Y: {sy}')
+                if not os.path.exists('failed_donuts'):
+                    os.mkdir('failed_donuts')
+                comm = f'mv {filename} failed_donuts/'
+                print(comm)
+                os.system(comm)
+                continue
+
+            # do photometry on good images
+            j.photometry.phot(data, shift, x, y, rsi, rso, night_config['aperture_radii'],
+                              filename, jd, bjd, hjd, ds9_name=ds9_window_id,
+                              gain=1.0, draw_regions=draw_regions,
+                              phot_filename_prefix=f"rtp_{night_config['filter']}",
+                              index_offset=inst_config['ds9']['index_offset'])
+            t2 = datetime.utcnow()
+            print(t2-t1)
+

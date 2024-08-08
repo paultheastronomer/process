@@ -3,8 +3,9 @@
 A collection of scripts for analysing data from different instruments using the routines in JASTRO
 
    1. ```process_leowasp.py``` script for reducing LEOWASP data and performing aperture photometry
-   1. ```analyse_leowasp.py``` script to analyse the aperture photometry of LEOWASP data
-   1. ```process_halfmetre.py``` script for reducing LP 0.5m data and performing aperture photometry
+   2. ```analyse_leowasp.py``` script to analyse the aperture photometry of LEOWASP data
+   3. ```process_halfmetre.py``` script for reducing LP 0.5m data and performing aperture photometry
+   4. ```process_marsh.py``` script for reducing Marsh telescope data and performing aperture photometry
 
 
 # Installing JASTRO
@@ -90,6 +91,7 @@ Photometry is then analysed with a second analysis script e.g:
         ],
         "ra_keyword": "MNTRA",
         "dec_keyword": "MNTDEC",
+        "object_keyword": "OBJECT",
         "filter_keyword": "FILTER",
         "image_type_keyword": "IMAGETYP",
         "image_keyword": "SCIENCE",
@@ -136,5 +138,5 @@ annulus(5048.4832,3392.7397,20.0,30.0) # text={5}
 
 # Contributors
 
-James McCormac
+James McCormac  
 Paul Strøm
