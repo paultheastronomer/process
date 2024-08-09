@@ -8,7 +8,7 @@ import os
 import time
 import warnings
 import argparse as ap
-from datetime import datetime
+from datetime import datetime, timezone
 import numpy as np
 from astropy.wcs import FITSFixedWarning
 from donuts import Donuts
@@ -107,9 +107,8 @@ if __name__ == '__main__':
     # check if only dealing with calibration frames
     if not args.calibrations_only:
         # reduce all the images and do the photometry
-        print(images['science'])
         for filename in images['science'][night_config["object_id"]][night_config["filter"]]:
-            t1 = datetime.utcnow()
+            t1 = datetime.now(timezone.utc)
             if ds9:
                 j.ds9.display(ds9_window_id, filename)
             # correct the times and reduce the images
@@ -137,13 +136,11 @@ if __name__ == '__main__':
                 print(comm)
                 os.system(comm)
                 continue
-
             # do photometry on good images
             j.photometry.phot(data, shift, x, y, rsi, rso, night_config['aperture_radii'],
                               filename, jd, bjd, hjd, ds9_name=ds9_window_id,
                               gain=1.0, draw_regions=draw_regions,
                               phot_filename_prefix=f"rtp_{night_config['filter']}",
                               index_offset=inst_config['ds9']['index_offset'])
-            t2 = datetime.utcnow()
+            t2 = datetime.now(timezone.utc)
             print(t2-t1)
-
