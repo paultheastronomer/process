@@ -66,10 +66,15 @@ if __name__ == "__main__":
     fit_type = night_config['fit_type']
     fit_low = night_config['fit_parameters'][0]
     fit_high = night_config['fit_parameters'][1]
+    # get some target info
+    target_id = j.housekeeping.get_target_id(night_config['reference_image'],
+                                             inst_config['imager']['object_keyword'])
+    night_id = j.housekeeping.get_night_id(night_config['reference_image'],
+                                           inst_config['imager']['dateobs_start_keyword'])
 
     # load the photometry file
     try:
-        lcs = pd.read_csv(args.phot_file, header=None, skiprows=0, delim_whitespace=True)
+        lcs = pd.read_csv(args.phot_file, header=None, skiprows=0, sep=r'\s+')
         n_comp_stars = ((len(lcs.columns)-N_PRE_PHOT_COLS)//N_PHOT_OUTPUT_COLS) - 1
     except FileNotFoundError:
         print('File not found {args.phot_file}...')
@@ -110,11 +115,11 @@ if __name__ == "__main__":
 
     if args.checks:
         # plot the maximium pixel values
-        j.plots.plot_max_pixel_values(jd, comparisons_max_pix, target_max_pix)
+        j.plots.plot_max_pixel_values(jd, comparisons_max_pix, target_max_pix, target_id, filt, aperture_radius)
         # plot the comparisons
-        j.plots.plot_comparison_stars(jd, comparisons)
+        j.plots.plot_comparison_stars(jd, comparisons, target_id, filt, aperture_radius)
         # plot the raw fluxes
-        j.plots.plot_star_fluxes(jd, comparisons, target, aperture_radius)
+        j.plots.plot_star_fluxes(jd, comparisons, target, target_id, filt, aperture_radius)
 
     # get error on transit from quotiant rule for errors
     lightcurve = target/comparison
@@ -122,11 +127,6 @@ if __name__ == "__main__":
     dy = comparison_err/comparison
     lightcurve_err = np.sqrt((dx**2)+(dy**2)) * lightcurve
 
-    # get some target info
-    target_id = j.housekeeping.get_target_id(night_config['reference_image'],
-                                             inst_config['imager']['object_keyword'])
-    night_id = j.housekeeping.get_night_id(night_config['reference_image'],
-                                           inst_config['imager']['dateobs_start_keyword'])
     # normalise the light curve
     lightcurve_n, lightcurve_err_n, bjd_b, lightcurve_nb, lightcurve_err_nb = j.lightcurves.normalise(filt,
         bjd, jd0, lightcurve, lightcurve_err, aperture_radius, bin_fact, target_id,
